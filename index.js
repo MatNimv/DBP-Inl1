@@ -16,18 +16,16 @@ async function getSameTasteUsers(){
 }
 getSameTasteUsers();
 
-//hämta ut alla målningar, 1 GÅNG!!!
-
+//hämta ut alla målningar, 1 GÅNG!!! Bara IDn nu.
 async function getPaintingsIDs(){
     const response = await fetch("https://collectionapi.metmuseum.org/public/collection/v1/search?departmentId=11&q=snow");
     const data = await response.json();
     return data;
 }
+//tar datan (IDs) från getPaintingIDs - och sätter in det i getPaintingInfo
 getPaintingsIDs()
     .then(data => getPaintingInfo(data))
 
-
-//tar datan (IDs) från getPaintingIDs - och sätter in det i getPaintingInfo
 async function getPaintingInfo(arrayOfIDs){
     const arrayOfFetchPromises = [];
 
@@ -38,12 +36,16 @@ async function getPaintingInfo(arrayOfIDs){
     arrayOfFetchPromises.push(fetch(rqst));
     });
 
+    //skapar en array av responses, från de promisen vi nyss fetchat - i en array
     const arrayOfResponses = await Promise.all(arrayOfFetchPromises);
 
+    //av responsen vill vi mapa ut dom till varsitt JSON-objekt.
     const arrayOfJSONPromises = arrayOfResponses.map(response => response.json());
+    
+    //med Promise.all väntar vi på att alla promises resolvas.
     const arrayOfJSONData = await Promise.all(arrayOfJSONPromises);
 
-    //sorterar bort nycklarna från datan och skapar ny array av målningsobjekten
+    //sorterar bort onödiga nycklar från datan och skapar ny array av målningsobjekten
     let paintingObj = arrayOfJSONData.map(pain => { return {
         objectID: pain.objectID,
         primaryImageSmall: pain.primaryImageSmall,
@@ -52,11 +54,9 @@ async function getPaintingInfo(arrayOfIDs){
     }
 
     })
-    console.log(paintingObj);
+    //varje målning sätts in i localStorage.
     paintingObj.forEach(element => {
         localStorage.setItem(`${element.objectID}`, `${element.title}`);
-        //localStorage.setItem(`${JSON.parse(element.objectID)}, ${JSON.parse(element.title)}`);
     })
-
+    return paintingObj;
 }
-console.log(sessionStorage.getItem("436011"));
