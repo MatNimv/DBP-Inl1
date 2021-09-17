@@ -1,0 +1,36 @@
+body{
+    height:100vh;
+    background-color: rgb(140, 140, 228);
+    overflow-y: hidden;
+    margin: 10px;
+}
+
+#listOfUsers{
+    background-color:rgb(220, 182, 241);
+    margin: 3px;
+    overflow-y:scroll;
+    width: 30vw;
+}
+
+.oneUser{
+    margin: 5px;
+    padding: 3px;
+    border: 1px solid rgba(63, 40, 66, 0.233);
+}
+
+#listOfPaintings{
+    background-color:rgb(63, 40, 66);
+    width: 100vw;
+}
+
+.paintingDiv{
+
+}
+
+.favorited{
+
+}
+
+.sameFavorite{
+
+}
