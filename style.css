@@ -2,14 +2,21 @@ body{
     height:100vh;
     background-color: rgb(140, 140, 228);
     overflow-y: hidden;
+}
+
+main{
+    display:flex;
+    flex-direction: row;
     margin: 10px;
 }
 
+/* användarna */
 #listOfUsers{
     background-color:rgb(220, 182, 241);
     margin: 3px;
     overflow-y:scroll;
-    width: 30vw;
+    width: 25vw;
+    height: 100vh;
 }
 
 .oneUser{
@@ -17,14 +24,47 @@ body{
     padding: 3px;
     border: 1px solid rgba(63, 40, 66, 0.233);
 }
-
-#listOfPaintings{
-    background-color:rgb(63, 40, 66);
-    width: 100vw;
+.oneUser:hover{
+    background-color:rgba(71, 46, 75, 0.13);
 }
 
-.paintingDiv{
+.userSelected{
+    background-color:rgba(63, 40, 66, 0.233);
+    color:white;
+}
 
+/* målningarna */
+#listOfPaintings{
+    background-color:rgb(63, 40, 66);
+    height: 100vh;
+    overflow-y:scroll;
+    display:flex;
+    flex-direction: row;
+    flex-wrap:wrap;
+    width: 70vw;
+}
+
+.onePainting{
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    width: 180px;
+    margin: 15px;
+}
+
+.onePainting > img{
+    width: 180px;
+}
+
+.paintingText{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.add{
+    position:relative;
+    top:11px;
 }
 
 .favorited{
@@ -34,3 +74,5 @@ body{
 .sameFavorite{
 
 }
+
+
