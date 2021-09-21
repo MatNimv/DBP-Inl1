@@ -6,12 +6,12 @@ const mainUser = {
     favs: []
     };
 
-let paintingObj = [];
 //få ut alla users från SameTaste DB
 async function getSameTasteUsers(){
+    document.querySelector("#listOfUsers").innerHTML = "";
     const response = await fetch("http://mpp.erikpineiro.se/dbp/sameTaste/users.php");
     const data = await response.json();
-    data.message.sort((a,b) => a.alias > b.alias)
+    data.message.sort((a,b) => a.alias > b.alias);
 
     data.message.forEach(element => {
     let nameDiv = document.createElement("div");
@@ -21,9 +21,36 @@ async function getSameTasteUsers(){
     listan.append(nameDiv);
     });
 
+    document.querySelector("#listOfUsers").append(loadingScreen("#listOfUsers"));
+
     return data;
 }
+
+//skapar en "laddningsskärm", beroende på vilket element som skickas in
+//som argument
+function loadingScreen(whichElement){
+    let loadingDiv = document.createElement("div");
+    let theList = document.querySelector(`${whichElement}`);
+    let darkDiv = document.createElement("div");
+    loadingDiv.innerHTML = `
+    <div class="lds-dual-ring"></div>
+    `;
+
+    darkDiv.classList.add("darkDiv");
+    theList.append(darkDiv);
+    darkDiv.append(loadingDiv);
+
+    setInterval(() => {
+        loadingDiv.remove();
+        darkDiv.remove();
+    }, 3000);
+    return loadingDiv;
+}
+
 getSameTasteUsers();
+//var trettionde sekund hämtas alla users.
+setInterval(getSameTasteUsers, 30000);
+
 
 //hämta ut alla målningar, 1 GÅNG!!! Bara IDn här.
 async function getPaintingsIDs(){
@@ -56,7 +83,7 @@ async function getPaintingInfo(arrayOfIDs){
     const arrayOfJSONData = await Promise.all(arrayOfJSONPromises);
 
     //sorterar bort onödiga nycklar från datan och skapar ny array av målningsobjekten
-    paintingArr = arrayOfJSONData.map(pain => { return {
+    let paintingArr = arrayOfJSONData.map(pain => { return {
         objectID: pain.objectID,
         primaryImageSmall: pain.primaryImageSmall,
         title: pain.title,
@@ -64,24 +91,25 @@ async function getPaintingInfo(arrayOfIDs){
     }});
     paintingArr.sort((a,b) => a.artistDisplayName > b.artistDisplayName);
 
-    //gör en string av hela arrayen , som sätts in i en localStorage
+    //gör en string av hela arrayen , som sätts in i localStorage
     let stringyObj = JSON.stringify(paintingArr);
     localStorage.setItem(`Paintings`,`${stringyObj}`);
 
+    return paintingArr;
+};
 
-    //localStorage.setItem(push(paintingObj));
-    //varje målning sätts in i localStorage.
-    //paintingObj.forEach(element => {
-    //    localStorage.setItem(`${element.objectID}`, `${element.title}`);
-    //})
-
-    paintingObj.forEach(element => {
+//skriver ut alla paintings från localStorage. 
+//bäst vore om argumentet var en array som skickades in från en annan funktion
+//som exempelvis kan hämta en specifik persons favoritmålningar
+function showPaintings(){
+    let arrayOfObjectPaintings = JSON.parse(localStorage.getItem("Paintings"));
+    arrayOfObjectPaintings.forEach(element => {
         let paintingDiv = document.createElement("div");
         let listOfPaintings = document.getElementById("listOfPaintings");
-        paintingDiv.classList.add("onePainting")
+        paintingDiv.classList.add("onePainting");
 
         paintingDiv.innerHTML = `
-            <img src="${element.primaryImageSmall}">
+            <img class="image" src ="${element.primaryImageSmall}">
             <div class="paintingText">
                 <p>${element.artistDisplayName}</p>
                 <p>${element.title}</p>
@@ -90,36 +118,92 @@ async function getPaintingInfo(arrayOfIDs){
         paintingDiv.prepend(yourHandler());
         listOfPaintings.append(paintingDiv);
     });
-    console.log(paintingObj);
-    return paintingObj;
 }
-
-//såhär ska jag skriva för att få ut alla objekt från localStorage
-    let localParse = JSON.parse(localStorage.getItem("Paintings"));
-    //specifikt detta i konsolloggen
-    console.log(localParse);
+showPaintings()
 
 function yourHandler(choice){
     let button = document.createElement("button");
+
+    let paintingArr = JSON.parse(localStorage.getItem("Paintings"));
 
     button.innerHTML = "ADD";
     button.classList.add("add");
 
     if (button.classList.contains("add")){
         button.addEventListener("click", function (e){
+            console.log("add");
             
-            let click = e.target.nextElementSibling.nextElementSibling.innerHTML;
-            console.log(click);
-            console.log(e.target);
+            let target = e.target
+            let click = target.nextElementSibling.currentSrc;
 
-        let request = new Request('http://mpp.erikpineiro.se/dbp/sameTaste/users.php');
-        fetch(request), 
+            let findObjectID = paintingArr.find(pain => click == pain.primaryImageSmall);
+            console.log(findObjectID.objectID);
+
+            button.innerHTML = "REMOVE";
+            button.classList.add("remove");
+            button.classList.remove("add");
+
+            document.querySelector("#listOfUsers").append(loadingScreen(".image"));
+
+        fetch(new Request("http://mpp.erikpineiro.se/dbp/sameTaste/users.php",
         {
-        method: "PATCH",
-        body: JSON.stringify({id: mainUser.id, addFav: []}),
-        headers: {"Content-type": "application/json; charset=UTF-8"}, 
-        }
-        })
+            method: "PATCH",
+            body: JSON.stringify({id: mainUser.id, addFav: `${findObjectID.objectID}`}),
+            headers:  {"Content-type": "application/json; charset=UTF-8"}, 
+        }))
+        .then( response =>{
+            if (response.status == 409){
+                console.log("maxinum favs uppnådd");
+            }
+            else if (response.status == 404){
+                console.log("user_ID finns inte i DB");
+            }else if (response.status == 400){
+                console.log("bad request: various");
+            }else if (response.status == 415){
+                console.log("skicka en JSON TACK.");
+            }else if (response.status == 200){
+                console.log("tillagning gick bra");
+            }else {
+                return response.json();
+            }});
+        e.stopPropagation()
+    });
+
+        } else if (button.classList.contains("remove")){
+                console.log("remove");
+                    button.addEventListener("click", function (e){
+                    
+                    let click = e.target.nextElementSibling.currentSrc;
+
+                    let findObjectID = paintingArr.find(pain => click == pain.primaryImageSmall);
+                    console.log(findObjectID.objectID);
+
+                    button.innerHTML = "ADD";
+                    button.classList.add("add");
+                    button.classList.remove("remove");
+
+                fetch(new Request("http://mpp.erikpineiro.se/dbp/sameTaste/users.php",
+                {
+                    method: "PATCH",
+                    body: {id: mainUser.id, removeFav: findObjectID.objectID},
+                    headers:  {"Content-type": "application/json; charset=UTF-8"}, 
+                }))
+                .then( response =>{
+                    if (response.status == 404){
+                        console.log("not found: user_ID ex");
+                    }else if (response.status == 400){
+                        console.log("bad request, various");
+                    }else if (response.status == 415){
+                        console.log("skicka en JSON TACK.");
+                    }else if (response.status == 200){
+                        console.log("borttagning gick bra.");
+                    }
+                    else {
+                        return response.json();
+                    }
+            });
+            e.stopPropagation()
+        });
     }
     return button;
 }

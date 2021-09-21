@@ -146,3 +146,9 @@
 //});
 //}
 //}
+
+    //localStorage.setItem(push(paintingObj));
+    //varje målning sätts in i localStorage.
+    //paintingObj.forEach(element => {
+    //    localStorage.setItem(`${element.objectID}`, `${element.title}`);
+    //})
