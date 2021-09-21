@@ -121,20 +121,19 @@ function showPaintings(){
 }
 showPaintings()
 
-function yourHandler(choice){
+function yourHandler(){
     let button = document.createElement("button");
 
     let paintingArr = JSON.parse(localStorage.getItem("Paintings"));
 
-    button.innerHTML = "ADD";
-    button.classList.add("add");
+    button.innerHTML = "REMOVE";
+    button.classList.add("remove");
 
     if (button.classList.contains("add")){
         button.addEventListener("click", function (e){
             console.log("add");
             
-            let target = e.target
-            let click = target.nextElementSibling.currentSrc;
+            let click = e.target.nextElementSibling.currentSrc;
 
             let findObjectID = paintingArr.find(pain => click == pain.primaryImageSmall);
             console.log(findObjectID.objectID);
@@ -143,19 +142,18 @@ function yourHandler(choice){
             button.classList.add("remove");
             button.classList.remove("add");
 
-            document.querySelector("#listOfUsers").append(loadingScreen(".image"));
+            document.querySelector("#listOfPaintings").append(loadingScreen("#listOfPaintings"));
 
         fetch(new Request("http://mpp.erikpineiro.se/dbp/sameTaste/users.php",
         {
             method: "PATCH",
             body: JSON.stringify({id: mainUser.id, addFav: `${findObjectID.objectID}`}),
-            headers:  {"Content-type": "application/json; charset=UTF-8"}, 
+            headers:  {"Content-type": "application/json; charset=UTF-8"},
         }))
         .then( response =>{
             if (response.status == 409){
                 console.log("maxinum favs uppnådd");
-            }
-            else if (response.status == 404){
+            }else if (response.status == 404){
                 console.log("user_ID finns inte i DB");
             }else if (response.status == 400){
                 console.log("bad request: various");
@@ -170,37 +168,38 @@ function yourHandler(choice){
     });
 
         } else if (button.classList.contains("remove")){
+
+                button.addEventListener("click", function (e){
                 console.log("remove");
-                    button.addEventListener("click", function (e){
-                    
-                    let click = e.target.nextElementSibling.currentSrc;
 
-                    let findObjectID = paintingArr.find(pain => click == pain.primaryImageSmall);
-                    console.log(findObjectID.objectID);
+                let click = e.target.nextElementSibling.currentSrc;
 
-                    button.innerHTML = "ADD";
-                    button.classList.add("add");
-                    button.classList.remove("remove");
+                let findObjectID = paintingArr.find(pain => click == pain.primaryImageSmall);
+                console.log(findObjectID.objectID);
 
-                fetch(new Request("http://mpp.erikpineiro.se/dbp/sameTaste/users.php",
-                {
-                    method: "PATCH",
-                    body: {id: mainUser.id, removeFav: findObjectID.objectID},
-                    headers:  {"Content-type": "application/json; charset=UTF-8"}, 
-                }))
-                .then( response =>{
-                    if (response.status == 404){
-                        console.log("not found: user_ID ex");
-                    }else if (response.status == 400){
-                        console.log("bad request, various");
-                    }else if (response.status == 415){
-                        console.log("skicka en JSON TACK.");
-                    }else if (response.status == 200){
-                        console.log("borttagning gick bra.");
-                    }
-                    else {
-                        return response.json();
-                    }
+                button.innerHTML = "ADD";
+                button.classList.add("add");
+                button.classList.remove("remove");
+
+            fetch(new Request("http://mpp.erikpineiro.se/dbp/sameTaste/users.php",
+            {
+                method: "PATCH",
+                body: JSON.stringify({id: mainUser.id, removeFav: findObjectID.objectID}),
+                headers:  {"Content-type": "application/json; charset=UTF-8"}, 
+            }))
+            .then( response =>{
+                if (response.status == 404){
+                    console.log("not found: user_ID ex");
+                }else if (response.status == 400){
+                    console.log("bad request, various");
+                }else if (response.status == 415){
+                    console.log("skicka en JSON TACK.");
+                }else if (response.status == 200){
+                    console.log("borttagning gick bra.");
+                }
+                else {
+                    return response.json();
+                }
             });
             e.stopPropagation()
         });
