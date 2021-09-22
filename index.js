@@ -6,6 +6,16 @@ const mainUser = {
     favs: []
     };
 
+showPaintings(JSON.parse(localStorage.getItem("Paintings")));
+
+//var listan = document.querySelectorAll('#listOfUsers')
+//icke fungerande select klass vid klick
+//document.querySelector("#listOfUsers").addEventListener('click', function () {
+//    for (let i = 0; i < listan.length; i++) {
+//        listan[i].classList.remove("selected");
+//    }
+//})
+
 getSameTasteUsers();
 //få ut alla users från SameTaste DB
 async function getSameTasteUsers(){
@@ -14,6 +24,11 @@ async function getSameTasteUsers(){
     const data = await response.json();
     data.message.sort((a,b) => a.alias > b.alias);
 
+    //flyttar mainUser längst upp
+    let main = data.message.filter(main => main.id == mainUser.id);
+    data.message.unshift(...main);
+    data.message.splice(16,1);
+
     data.message.forEach(element => {
     let nameDiv = document.createElement("div");
     let listan = document.getElementById("listOfUsers");
@@ -21,7 +36,6 @@ async function getSameTasteUsers(){
     nameDiv.classList.add("oneUser");
     listan.append(nameDiv);
     });
-
     document.querySelector("#listOfUsers").append(loadingScreen("#listOfUsers"));
 
     //här väljer man vilken user som ska visas. Den ska hämta users från DB 
@@ -31,27 +45,58 @@ async function getSameTasteUsers(){
 
     document.querySelector("#listOfUsers").addEventListener("click", (e) => {
         document.querySelector("#listOfPaintings").innerHTML = "";
-            let clickedUser = e.target.firstChild.innerHTML;
+        let clickedUser = e.target.firstChild.innerHTML;
 
-            //jag måste koppla mina favoriter med deras.
-            //samtidigt 
+        e.target.classList.add("selected");
 
-            let specificUser = data.message.find(user => user.alias == `${clickedUser}`);
-            console.log(specificUser);
+        //jag måste koppla mina favoriter med deras.
+        //samtidigt få fram alla deras favvosar. 
+        let specificClickUser = data.message.find(user => user.alias == `${clickedUser}`);
 
-            let filteredUserFavs = paintingArr.filter((ID) => specificUser.favs.includes(ID.objectID));
+        //skapar om eventuella strings i favs till int
+        let specificClickUserFAVS = specificClickUser.favs.map(function(item) {
+            return parseInt(item, 10);
+        });
 
-    console.log(filteredUserFavs);
-    showPaintings(filteredUserFavs);
-});
+        //byter ut den gamla sträng favs till int favs
+        specificClickUser.favs = [];
+        specificClickUser.favs.push(...specificClickUserFAVS);
+
+        //mainUsers favoriter. favs görs om till int
+        let myFavIDs = data.message.find(user => user.id == mainUser.id).favs;
+        let myFavIDsInt = myFavIDs.map(function(item) {
+            return parseInt(item, 10);
+        });
+
+        //jämför mainUsers favoriter med den specifika användarens favoriter
+        //om de som är samma, läggs till i arrayen.
+        let comparableFavIDs = myFavIDsInt.filter((ID) => specificClickUser.favs.includes(ID.objectID));
+        comparableFavIDs.sort((a,b) => a.artistDisplayName < b.artistDisplayName);
+
+        //jämför målningar mellan localStorage och den specifika användarens favoriter.
+        //visar bara dennes.
+        let specificUserFavs = paintingArr.filter((ID) => specificClickUser.favs.includes(ID.objectID));
+        specificUserFavs.sort((a,b) => a.artistDisplayName < b.artistDisplayName);
+        comparableFavIDs.push(...specificUserFavs);
+
+        console.log(comparableFavIDs);
+        loadingScreen("#listOfPaintings")
+    showPaintings(comparableFavIDs);
+
+    //1. få sträng till INT. DONE.
+    //2. sätt samman gemensamma favoriter och deras. DONE. inte i ordning tho
+    //3. return data ska vara ett objekt med data + en funktion.
+    //4. laddsymbol när en användare trycks. DONE
+    //5. få MatildaN längst upp. DONE
+    });
 return data;
 }
 
 //var trettionde sekund hämtas alla users.
 setInterval(getSameTasteUsers, 30000);
+
 //skapar en "laddningsskärm", beroende på vilket element som skickas in
 //som argument
-
 function loadingScreen(whichElement){
     let loadingDiv = document.createElement("div");
     let theList = document.querySelector(`${whichElement}`);
@@ -117,13 +162,6 @@ async function getPaintingInfo(arrayOfIDs){
     return paintingArr;
 };
 
-//parametern är 
-function whichUser(){
-
-    showPaintings(JSON.parse(localStorage.getItem("Paintings")));
-}
-whichUser();
-
 function showPaintings(arrayOfObjectPaintings){
     arrayOfObjectPaintings.forEach(element => {
         let paintingDiv = document.createElement("div");
@@ -131,7 +169,7 @@ function showPaintings(arrayOfObjectPaintings){
         paintingDiv.classList.add("onePainting");
 
         paintingDiv.innerHTML = `
-            <img class="image" src ="${element.primaryImageSmall}">
+            <img class=""src="${element.primaryImageSmall}">
             <div class="paintingText">
                 <p>${element.artistDisplayName}</p>
                 <p>${element.title}</p>
@@ -142,28 +180,28 @@ function showPaintings(arrayOfObjectPaintings){
     });
 }
 
-function yourHandler(){
+function yourHandler(klass){
     let button = document.createElement("button");
 
     let paintingArr = JSON.parse(localStorage.getItem("Paintings"));
 
-    button.innerHTML = "ADD";
-    button.classList.add("add");
+    button.innerHTML = `add`;
+    button.classList.add(`add`);
 
-        button.addEventListener("click", function (e){
-            if (button.classList.contains("add")){
-            console.log("add");
-            
-            let click = e.target.nextElementSibling.currentSrc;
+    button.addEventListener("click", function (e){
+        if (button.classList.contains("add")){
+        console.log("add");
+        
+        let click = e.target.nextElementSibling.currentSrc;
 
-            let findObjectID = paintingArr.find(pain => click == pain.primaryImageSmall);
-            console.log(findObjectID.objectID);
+        let findObjectID = paintingArr.find(pain => click == pain.primaryImageSmall);
+        console.log(findObjectID.objectID);
 
-            button.innerHTML = "REMOVE";
-            button.classList.add("remove");
-            button.classList.remove("add");
+        button.innerHTML = "REMOVE";
+        button.classList.add("remove");
+        button.classList.remove("add");
 
-            document.querySelector("#listOfPaintings").append(loadingScreen("#listOfPaintings"));
+        document.querySelector("#listOfPaintings").append(loadingScreen("#listOfPaintings"));
 
         fetch(new Request("http://mpp.erikpineiro.se/dbp/sameTaste/users.php",
         {
@@ -195,6 +233,8 @@ function yourHandler(){
                 button.innerHTML = "ADD";
                 button.classList.add("add");
                 button.classList.remove("remove");
+
+                document.querySelector("#listOfPaintings").append(loadingScreen("#listOfPaintings"));
 
             fetch(new Request("http://mpp.erikpineiro.se/dbp/sameTaste/users.php",
             {

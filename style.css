@@ -73,6 +73,11 @@ main{
     top:11px;
 }
 
+.selected{
+    background-color: rgb(117, 47, 155);
+    color:white;
+}
+
 .favorited{
 
 }
