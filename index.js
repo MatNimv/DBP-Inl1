@@ -6,6 +6,7 @@ const mainUser = {
     favs: []
     };
 
+getSameTasteUsers();
 //få ut alla users från SameTaste DB
 async function getSameTasteUsers(){
     document.querySelector("#listOfUsers").innerHTML = "";
@@ -16,24 +17,47 @@ async function getSameTasteUsers(){
     data.message.forEach(element => {
     let nameDiv = document.createElement("div");
     let listan = document.getElementById("listOfUsers");
-    nameDiv.innerHTML = `${element.alias}, [${element.favs.length}] ()`;
+    nameDiv.innerHTML = `<span>${element.alias}</span>, <span>[${element.favs.length}] ()</span>`;
     nameDiv.classList.add("oneUser");
     listan.append(nameDiv);
     });
 
     document.querySelector("#listOfUsers").append(loadingScreen("#listOfUsers"));
 
-    return data;
+    //här väljer man vilken user som ska visas. Den ska hämta users från DB 
+    //och jämför med localStoragens objID
+    //ska hämta showPaintings() och skicka in array av den user som är valds paintings
+    let paintingArr = JSON.parse(localStorage.getItem("Paintings"));
+
+    document.querySelector("#listOfUsers").addEventListener("click", (e) => {
+        document.querySelector("#listOfPaintings").innerHTML = "";
+            let clickedUser = e.target.firstChild.innerHTML;
+
+            //jag måste koppla mina favoriter med deras.
+            //samtidigt 
+
+            let specificUser = data.message.find(user => user.alias == `${clickedUser}`);
+            console.log(specificUser);
+
+            let filteredUserFavs = paintingArr.filter((ID) => specificUser.favs.includes(ID.objectID));
+
+    console.log(filteredUserFavs);
+    showPaintings(filteredUserFavs);
+});
+return data;
 }
 
+//var trettionde sekund hämtas alla users.
+setInterval(getSameTasteUsers, 30000);
 //skapar en "laddningsskärm", beroende på vilket element som skickas in
 //som argument
+
 function loadingScreen(whichElement){
     let loadingDiv = document.createElement("div");
     let theList = document.querySelector(`${whichElement}`);
     let darkDiv = document.createElement("div");
     loadingDiv.innerHTML = `
-    <div class="lds-dual-ring"></div>
+        <div class="lds-dual-ring"></div>
     `;
 
     darkDiv.classList.add("darkDiv");
@@ -46,11 +70,6 @@ function loadingScreen(whichElement){
     }, 3000);
     return loadingDiv;
 }
-
-getSameTasteUsers();
-//var trettionde sekund hämtas alla users.
-setInterval(getSameTasteUsers, 30000);
-
 
 //hämta ut alla målningar, 1 GÅNG!!! Bara IDn här.
 async function getPaintingsIDs(){
@@ -98,11 +117,14 @@ async function getPaintingInfo(arrayOfIDs){
     return paintingArr;
 };
 
-//skriver ut alla paintings från localStorage. 
-//bäst vore om argumentet var en array som skickades in från en annan funktion
-//som exempelvis kan hämta en specifik persons favoritmålningar
-function showPaintings(){
-    let arrayOfObjectPaintings = JSON.parse(localStorage.getItem("Paintings"));
+//parametern är 
+function whichUser(){
+
+    showPaintings(JSON.parse(localStorage.getItem("Paintings")));
+}
+whichUser();
+
+function showPaintings(arrayOfObjectPaintings){
     arrayOfObjectPaintings.forEach(element => {
         let paintingDiv = document.createElement("div");
         let listOfPaintings = document.getElementById("listOfPaintings");
@@ -119,18 +141,17 @@ function showPaintings(){
         listOfPaintings.append(paintingDiv);
     });
 }
-showPaintings()
 
 function yourHandler(){
     let button = document.createElement("button");
 
     let paintingArr = JSON.parse(localStorage.getItem("Paintings"));
 
-    button.innerHTML = "REMOVE";
-    button.classList.add("remove");
+    button.innerHTML = "ADD";
+    button.classList.add("add");
 
-    if (button.classList.contains("add")){
         button.addEventListener("click", function (e){
+            if (button.classList.contains("add")){
             console.log("add");
             
             let click = e.target.nextElementSibling.currentSrc;
@@ -164,14 +185,8 @@ function yourHandler(){
             }else {
                 return response.json();
             }});
-        e.stopPropagation()
-    });
 
-        } else if (button.classList.contains("remove")){
-
-                button.addEventListener("click", function (e){
-                console.log("remove");
-
+            } else if (button.classList.contains("remove")){
                 let click = e.target.nextElementSibling.currentSrc;
 
                 let findObjectID = paintingArr.find(pain => click == pain.primaryImageSmall);
@@ -201,8 +216,10 @@ function yourHandler(){
                     return response.json();
                 }
             });
-            e.stopPropagation()
-        });
-    }
+        }
+    });
     return button;
-}
+};
+
+
+
