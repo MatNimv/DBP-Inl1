@@ -18,19 +18,26 @@ main{
     overflow-y:scroll;
     width: 250px;
     height: 100vh;
+
 }
 
 .oneUser{
     margin: 5px;
-    padding: 3px;
+    padding: 15px;
     border: 1px solid rgba(63, 40, 66, 0.233);
+    border-radius: 5px;
 }
+
+.oneUser:active{
+    background-color:rgb(71, 46, 75);
+}
+
 .oneUser:hover{
-    background-color:rgba(71, 46, 75, 0.13);
+    background-color:rgba(121, 79, 128, 0.753);
 }
 
 .userSelected{
-    background-color:rgba(63, 40, 66, 0.233);
+    background-color:rgba(92, 58, 97, 0.808);
     color:white;
 }
 
@@ -51,6 +58,9 @@ main{
     align-items: center;
     width: 180px;
     margin: 15px;
+    background-color: rgb(159, 212, 233);
+    padding: 10px;
+    border-radius: 10px;
 }
 
 .onePainting > img{
@@ -85,7 +95,7 @@ button{
 }
 
 .sameFavorite{
-    border: 10px solid blue;
+    border: 10px solid rgb(86, 209, 86);
 }
 
 /* LADDDNINNNGGGG */

@@ -6,8 +6,13 @@ const mainUser = {
     favs: []
     };
 
-    //let mainUserIsClicked = document.querySelector("#listOfUsers").firstChild;
-    //mainUserIsClicked.click();
+    //document.querySelector("#listOfUsers > :first-child").classList.add("selected");
+
+
+//let mainUserisClicked = document.querySelector("#listOfUsers").click();
+//    console.log(mainUserisClicked);
+//    mainUserisClicked.click();
+//
 showPaintings(JSON.parse(localStorage.getItem("Paintings")));
 
 //var listan = document.querySelectorAll('#listOfUsers')
@@ -32,8 +37,13 @@ async function getSameTasteUsers(){
     data.message.unshift(...main);
     data.message.splice(16,1);
 
+    //let userName = document.createElement("div");
+    //userName.innerHTML = "MatildaNs målningar"
+    //document.querySelector("#userName").prepend(userName);
+
     data.message.forEach(element => {
         let commonFavsArr = [];
+
 
         //commonFavsArr jämför favoritmålningar mellan användare
         let userFavs = element.favs.map(function(item) {return parseInt(item, 10);});
@@ -44,16 +54,24 @@ async function getSameTasteUsers(){
 
         let nameDiv = document.createElement("div");
         let listan = document.getElementById("listOfUsers");
+
+        if(element.id == mainUser.id){nameDiv.classList.add("selected")};
+
         nameDiv.innerHTML = `<span>${element.alias}</span>, <span>[${element.favs.length}] (${commonFavsArr.length})</span>`;
         nameDiv.classList.add("oneUser");
         listan.append(nameDiv);
     });
+
         document.querySelector("#listOfUsers").append(loadingScreen("#listOfUsers"));
 
         document.querySelector("#listOfUsers").addEventListener("click", function(e){
             document.querySelector("#listOfPaintings").innerHTML = "";
             let clickedUser = e.target.firstChild.innerHTML;
-            console.log(clickedUser);
+
+            var active = document.querySelector(".selected");
+            active.classList.remove("selected");
+
+            //userName.innerHTML = `${clickedUser}s`;
 
             e.target.classList.add("selected");
 
@@ -103,6 +121,7 @@ async function getSameTasteUsers(){
     });
     return data;
 }
+
 
 
 //var trettionde sekund hämtas alla users.
