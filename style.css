@@ -63,14 +63,16 @@ main{
     flex-direction: column;
 }
 
-.add{
+button{
     position:relative;
     top:11px;
 }
+.add{
+
+}
 
 .remove{
-    position:relative;
-    top:11px;
+
 }
 
 .selected{
@@ -79,11 +81,11 @@ main{
 }
 
 .favorited{
-
+    border: 10px cornflowerblue;
 }
 
 .sameFavorite{
-
+    border: 10px solid blue;
 }
 
 /* LADDDNINNNGGGG */
