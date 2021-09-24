@@ -15,6 +15,7 @@ async function showMainFirst(){
     let main = data.message.filter(main => main.id == mainUser.id);
 
     let mainFavs = data.message.find(user => user.id == mainUser.id).favs;
+    console.log(mainFavs);
     let mainFavsInt = mainFavs.map(function(item) {return parseInt(item, 10);});
 
     document.querySelector("#listOfPaintings").append(loadingScreen("#listOfPaintings"));
@@ -52,7 +53,6 @@ async function getSameTasteUsers(){
         let commonFavsInt = commonFavs.map(function(item) {return parseInt(item, 10);});
 
         let common  = commonFavsInt.filter(fav => mainFavsInt.includes(fav))
-        console.log(common)
 
         oneUser.innerHTML = `<span>${num.alias}</span>, <span>[${num.favs.length}] (${commonFavsInt.length})</span>`;
 
@@ -154,7 +154,6 @@ async function getPaintingInfo(arrayOfIDs){
 };
 
 async function showPaintings(arrayOfObjectPaintings, user, allPaintings, commonFavs, mainFavs){
-    console.log(user);
     const response = await fetch("http://mpp.erikpineiro.se/dbp/sameTaste/users.php");
     const data = await response.json();
 
@@ -193,8 +192,6 @@ async function showPaintings(arrayOfObjectPaintings, user, allPaintings, commonF
         if (commonFavs.includes(element.objectID)){
             paintingDiv.querySelector(".frame").classList.add("sameFavorite");
         }
-        console.log(user[0].id);
-        console.log(mainUser.id);
 
         if(user[0].id == mainUser.id){
             paintingDiv.prepend(addFavoriteWork(element.objectID, user, arrayOfObjectPaintings, users))
@@ -225,13 +222,10 @@ function addFavoriteWork(paintingID, user, favoritePaintings, users){
 
     button.addEventListener("click", function (e){
         if (button.classList.contains("add")){
-        console.log("add");
         
         let click = e.target.nextElementSibling.firstElementChild.currentSrc;
-        console.log(click);
 
         let findObjectID = paintingArr.find(pain => click == pain.primaryImageSmall);
-        console.log(findObjectID.objectID);
 
         button.innerHTML = "REMOVE";
         button.classList.add("remove");
