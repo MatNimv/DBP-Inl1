@@ -14,9 +14,12 @@ async function showMainFirst(){
     
     let main = data.message.filter(main => main.id == mainUser.id);
 
+    let mainFavs = data.message.find(user => user.id == mainUser.id).favs;
+    let mainFavsInt = mainFavs.map(function(item) {return parseInt(item, 10);});
+
     document.querySelector("#listOfPaintings").append(loadingScreen("#listOfPaintings"));
 
-    return showPaintings(paintingArr, main, paintingArr);
+    return showPaintings(paintingArr, main, paintingArr, mainFavsInt);
 }
 
 //få ut alla users från SameTaste DB
@@ -48,6 +51,9 @@ async function getSameTasteUsers(){
         let commonFavs = numFavInt.filter(fav => mainFavsInt.includes(fav));
         let commonFavsInt = commonFavs.map(function(item) {return parseInt(item, 10);});
 
+        let common  = commonFavsInt.filter(fav => mainFavsInt.includes(fav))
+console.log(common)
+
         oneUser.innerHTML = `<span>${num.alias}</span>, <span>[${num.favs.length}] (${commonFavsInt.length})</span>`;
 
         oneUser.addEventListener("click", (e) => {
@@ -59,7 +65,7 @@ async function getSameTasteUsers(){
 
             let clickedUser = e.target.firstChild.innerHTML;
             let specificUser = data.message.find(user => user.alias == `${clickedUser}`);
-        
+
             let filteredUserFavs = paintingArr.filter((id) => {
                 let specificClickUser = specificUser.favs.map(fave => parseInt(fave, 10));
 
@@ -69,8 +75,8 @@ async function getSameTasteUsers(){
                     return specificClickUser.includes((id.objectID));
                 }
             })
-            console.log(filteredUserFavs);
-            showPaintings(filteredUserFavs, specificUser, paintingArr, commonFavsInt);
+            console.log(common)
+            showPaintings(filteredUserFavs, specificUser, paintingArr, common);
         });
     });
     return data;
@@ -146,8 +152,8 @@ async function getPaintingInfo(arrayOfIDs){
     return paintingArr;
 };
 
-async function showPaintings(arrayOfObjectPaintings, user, allPaintings){
-    console.log(arrayOfObjectPaintings, user, allPaintings);
+async function showPaintings(arrayOfObjectPaintings, user, allPaintings, commonFavs){
+    console.log(commonFavs);
     const response = await fetch("http://mpp.erikpineiro.se/dbp/sameTaste/users.php");
     const data = await response.json();
 
@@ -177,6 +183,11 @@ async function showPaintings(arrayOfObjectPaintings, user, allPaintings){
                 <p>${element.title}</p>
             </div>
         `;
+
+        //console.log(commonFavs);
+        //if (commonFavs.includes(element.objectID)){
+        //    document.querySelector(".frame").classList.add("sameFavorite");
+        //}
 
         paintingDiv.prepend(addFavoriteWork(element.objectID, user, arrayOfObjectPaintings, users))
         listOfPaintings.append(paintingDiv);
