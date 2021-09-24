@@ -6,22 +6,7 @@ const mainUser = {
     favs: []
     };
 
-    //document.querySelector("#listOfUsers > :first-child").classList.add("selected");
-
-
-//let mainUserisClicked = document.querySelector("#listOfUsers").click();
-//    console.log(mainUserisClicked);
-//    mainUserisClicked.click();
-//
 showPaintings(JSON.parse(localStorage.getItem("Paintings")));
-
-//var listan = document.querySelectorAll('#listOfUsers')
-//icke fungerande select klass vid klick
-//document.querySelector("#listOfUsers").addEventListener('click', function () {
-//    for (let i = 0; i < listan.length; i++) {
-//        listan[i].classList.remove("selected");
-//    }
-//})
 
 getSameTasteUsers();
 //få ut alla users från SameTaste DB
@@ -41,9 +26,9 @@ async function getSameTasteUsers(){
     //userName.innerHTML = "MatildaNs målningar"
     //document.querySelector("#userName").prepend(userName);
 
+
     data.message.forEach(element => {
         let commonFavsArr = [];
-
 
         //commonFavsArr jämför favoritmålningar mellan användare
         let userFavs = element.favs.map(function(item) {return parseInt(item, 10);});
@@ -62,6 +47,8 @@ async function getSameTasteUsers(){
         listan.append(nameDiv);
     });
 
+        //när jag klickar på en specifik användare hämtar jag dens
+        //information och jämför med mainUser.
         document.querySelector("#listOfUsers").append(loadingScreen("#listOfUsers"));
 
         document.querySelector("#listOfUsers").addEventListener("click", function(e){
@@ -107,9 +94,6 @@ async function getSameTasteUsers(){
             //commonFavsArr.push(commonFavsArr);
             showPaintings(commonFavs, "remove");
 
-            //sorterar bort så inte mainUsers och specifikUsers målningar dubbletteras
-            
-
             //jämför målningar mellan localStorage och den specifika 
             //användarens favoriter. visar bara dennes.
             let specificUserFavs = paintingArr.filter((ID) => specificClickUser.favs.includes(ID.objectID));
@@ -122,13 +106,11 @@ async function getSameTasteUsers(){
     return data;
 }
 
-
-
 //var trettionde sekund hämtas alla users.
 setInterval(getSameTasteUsers, 30000);
 
-//skapar en "laddningsskärm", beroende på vilket element som skickas in
-//som argument
+//skapar en "laddningsskärm", beroende på vilket element som 
+//skickas in som argument
 function loadingScreen(whichElement){
     let loadingDiv = document.createElement("div");
     let theList = document.querySelector(`${whichElement}`);
@@ -216,7 +198,7 @@ function showPaintings(arrayOfObjectPaintings, klass){
     });
 }
 
-async function yourHandler(klass){
+function yourHandler(klass){
 
     //här behövs en jämförelse göras då jag 
     //kallar på datan från getUserSameTaste
@@ -261,6 +243,7 @@ async function yourHandler(klass){
         }))
         .then( response =>{
             if (response.status == 409){
+                showUpDiv("Max antal favoriter uppnådd!", "#listOfPaintings")
                 console.log("maxinum favs uppnådd");
             }else if (response.status == 404){
                 console.log("user_ID finns inte i DB");
@@ -309,5 +292,14 @@ async function yourHandler(klass){
         }
     });
     return button;
+};
+
+
+function felMeddelande(message, whichElement){
+    let showUpDiv = document.createElement("div");
+    showUpDiv.innerHTML = `${message}`;
+    showUpDiv.classList.add("showUpDiv");
+    showUpDiv.append(whichElement)
+    return showUpDiv;
 };
 
