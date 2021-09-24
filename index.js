@@ -6,12 +6,34 @@ const mainUser = {
     favs: []
     };
 
-showPaintings(JSON.parse(localStorage.getItem("Paintings")));
+showMainFirst();
+async function showMainFirst(){
+    let paintingArr = JSON.parse(localStorage.getItem("Paintings"));
+    const data = await getSameTasteUsers();
+    
+    let main = data.message.filter(main => main.id == mainUser.id);
+    let mainFavs = data.message.find(user => user.id == mainUser.id).favs;
+    let mainFavsInt = mainFavs.map(function(item) {return parseInt(item, 10);});
+    
+    //kalla på mainUser direkt
+    let mainFavPaintings = paintingArr.filter((id) => mainFavsInt.includes(id.objectID));
+    console.log(mainFavPaintings)
+
+    //let restPaintings = paintingArr.filter((id) => !mainFavPaintings.objectID.includes(id.objectID));
+    let restPaintings = paintingArr.filter((id) => !mainFavsInt.includes(id.objectID));
+
+    mainFavPaintings.push(...restPaintings);
+    console.log(mainFavPaintings);
+    
+
+    return showPaintings(mainFavPaintings, main, paintingArr);
+}
 
 getSameTasteUsers();
 //få ut alla users från SameTaste DB
 async function getSameTasteUsers(){
     let paintingArr = JSON.parse(localStorage.getItem("Paintings"));
+
     document.querySelector("#listOfUsers").innerHTML = "";
     const response = await fetch("http://mpp.erikpineiro.se/dbp/sameTaste/users.php");
     const data = await response.json();
@@ -22,85 +44,54 @@ async function getSameTasteUsers(){
     data.message.unshift(...main);
     data.message.splice(16,1);
 
-    //let userName = document.createElement("div");
-    //userName.innerHTML = "MatildaNs målningar"
-    //document.querySelector("#userName").prepend(userName);
 
+    let mainFavs = data.message.find(user => user.id == mainUser.id).favs;
+    let mainFavsInt = mainFavs.map(function(item) {return parseInt(item, 10);});
+    
+    //kalla på mainUser direkt
+    //let mainFavPaintings = paintingArr.filter((id) => mainFavsInt.includes(id.objectID));
+    //console.log(mainFavPaintings)
+//
+    ////let restPaintings = paintingArr.filter((id) => !mainFavPaintings.objectID.includes(id.objectID));
+    //let restPaintings = paintingArr.filter((id) => !mainFavsInt.includes(id.objectID));
 
-    data.message.forEach(element => {
-        let commonFavsArr = [];
+    //mainFavPaintings.push(...restPaintings);
+    //console.log(mainFavPaintings);
+    
 
-        //commonFavsArr jämför favoritmålningar mellan användare
-        let userFavs = element.favs.map(function(item) {return parseInt(item, 10);});
-        let main = data.message.find(user => user.id == mainUser.id).favs;
-        let mainFavs = main.map(function(item) {return parseInt(item, 10);});
-        let checkDifference = userFavs.filter((fav) => mainFavs.includes(fav));
-        commonFavsArr.push(...checkDifference);
+    //showPaintings(mainFavPaintings, main, paintingArr);
 
-        let nameDiv = document.createElement("div");
-        let listan = document.getElementById("listOfUsers");
+    data.message.forEach(num => {
+        let oneUser = document.createElement("div");
+        oneUser.classList.add("oneUser");
+        document.querySelector("#listOfUsers").append(oneUser);
+        document.querySelector("#listOfUsers").firstChild.classList.add("selected");
 
-        if(element.id == mainUser.id){nameDiv.classList.add("selected")};
+        let commonFavs = num.favs.filter(fav => mainFavsInt.includes(fav));
+        oneUser.innerHTML = `<span>${num.alias}</span>, <span>[${num.favs.length}] (${commonFavs.length})</span>`;
 
-        nameDiv.innerHTML = `<span>${element.alias}</span>, <span>[${element.favs.length}] (${commonFavsArr.length})</span>`;
-        nameDiv.classList.add("oneUser");
-        listan.append(nameDiv);
-    });
-
-        //när jag klickar på en specifik användare hämtar jag dens
-        //information och jämför med mainUser.
-        document.querySelector("#listOfUsers").append(loadingScreen("#listOfUsers"));
-
-        document.querySelector("#listOfUsers").addEventListener("click", function(e){
+        oneUser.addEventListener("click", (e) => {
             document.querySelector("#listOfPaintings").innerHTML = "";
-            let clickedUser = e.target.firstChild.innerHTML;
 
             var active = document.querySelector(".selected");
             active.classList.remove("selected");
-
-            //userName.innerHTML = `${clickedUser}s`;
-
             e.target.classList.add("selected");
 
-            //jag måste koppla mina favoriter med deras.
-            //samtidigt få fram alla deras favvosar. 
-            let specificClickUser = data.message.find(user => user.alias == `${clickedUser}`);
+            let clickedUser = e.target.firstChild.innerHTML;
+            let specificUser = data.message.find(user => user.alias == `${clickedUser}`);
+        
+            let filteredUserFavs = paintingArr.filter((id) => {
+                let specificClickUser = specificUser.favs.map(fave => parseInt(fave, 10));
 
-            //skapar om eventuella strings i favs till int
-            let specificClickUserFAVS = specificClickUser.favs.map(function(item) {return parseInt(item, 10);});
-
-            //byter ut den gamla sträng favs till int favs
-            specificClickUser.favs = [];
-            specificClickUser.favs.push(...specificClickUserFAVS);
-
-            //mainUsers favoriter.
-            let myFavIDs = data.message.find(user => user.id == mainUser.id).favs;
-
-            if (specificClickUser.id == mainUser.id){
-                //mainUsers favvomålningar
-                let mainUserFavs = paintingArr.filter((ID) => specificClickUser.favs.includes(ID.objectID));
-                showPaintings(mainUserFavs);
-                //resterande målningar
-                let otherPaintings = paintingArr.filter((ID) => !specificClickUser.favs.includes(ID.objectID));
-                showPaintings(otherPaintings);
-            } else {
-
-            //jämför mainUsers favoriter med den specifika användarens favoriter
-            //om de som är samma, läggs till i arrayen.
-            let comparableFavIDs = myFavIDs.filter((ID) => specificClickUser.favs.includes(ID));
-
-            let commonFavs = paintingArr.filter(pain => pain.objectID == comparableFavIDs)
-            console.log(commonFavs);
-            //commonFavsArr.push(commonFavsArr);
-            showPaintings(commonFavs, "remove");
-
-            //jämför målningar mellan localStorage och den specifika 
-            //användarens favoriter. visar bara dennes.
-            let specificUserFavs = paintingArr.filter((ID) => specificClickUser.favs.includes(ID.objectID));
-
-            loadingScreen("#listOfPaintings");
-            showPaintings(specificUserFavs);
-        }
+                if (specificUser.id == mainUser.id){
+                    return mainFavPaintings;
+                } else {
+                    return specificClickUser.includes((id.objectID));
+                }
+            })
+            console.log(filteredUserFavs);
+            showPaintings(filteredUserFavs, specificUser, paintingArr);
+        });
     });
     return data;
 }
@@ -175,15 +166,28 @@ async function getPaintingInfo(arrayOfIDs){
     return paintingArr;
 };
 
-function showPaintings(arrayOfObjectPaintings, klass){
+async function showPaintings(arrayOfObjectPaintings, user, allPaintings){
+    console.log(arrayOfObjectPaintings, user, allPaintings);
+    const response = await fetch("http://mpp.erikpineiro.se/dbp/sameTaste/users.php");
+    const data = await response.json();
 
-    arrayOfObjectPaintings.sort((a,b) => a.artistDisplayName > b.artistDisplayName);
+    let users = await data.message;
 
-    arrayOfObjectPaintings.forEach(element => {
+    let array;
+
+    if(user.id == mainUser.id){
+        array = allPaintings;
+    } else {
+        array = arrayOfObjectPaintings;
+    }
+
+    console.log(array);
+    array.sort((a,b) => a.artistDisplayName < b.artistDisplayName);
+
+    array.forEach(element => {
         let paintingDiv = document.createElement("div");
         let listOfPaintings = document.getElementById("listOfPaintings");
         paintingDiv.classList.add("onePainting");
-        paintingDiv.classList.add(`${klass}`);
 
         paintingDiv.innerHTML = `
             <img src="${element.primaryImageSmall}">
@@ -192,32 +196,32 @@ function showPaintings(arrayOfObjectPaintings, klass){
                 <p>${element.title}</p>
             </div>
         `;
-        paintingDiv.prepend(yourHandler(klass));
+
+        paintingDiv.prepend(addFavoriteWork(element.objectID, user, arrayOfObjectPaintings, users))
         listOfPaintings.append(paintingDiv);
     });
 }
 
-function yourHandler(klass){
-
-    //här behövs en jämförelse göras då jag 
-    //kallar på datan från getUserSameTaste
+function addFavoriteWork(paintingID, user, favoritePaintings, users){
     let button = document.createElement("button");
-//
-    //document.querySelector("#listOfUsers").innerHTML = "";
-    //const response = await fetch("http://mpp.erikpineiro.se/dbp/sameTaste/users.php");
-    //const data = await response.json();
-
-    //om objectID är inom mainUser favorit - ge knappen denna innerHMTL. REMOVE
-    
-
-    //om objectID är gemensam med mainUser och specifikUser favorit - ge knappen denna innerHMTL. REMOVE
-
-    //om objectID är ingetdera - ge knappen denna innerHMTL. ADD
-
     let paintingArr = JSON.parse(localStorage.getItem("Paintings"));
 
-    button.innerHTML = `add`;
-    button.classList.add(`add`);
+    let favoriteArray;
+
+    if (!user){
+        user = users.find(user => user.id === mainUser.id);
+        favoriteArray = user.favs;
+    } else {
+        favoriteArray = favoritePaintings.map(obj => obj.objectID);
+    }
+
+    if (favoriteArray.includes(paintingID)){
+        button.innerHTML = "REMOVE";
+        button.classList.add("remove");
+    } else {
+        button.innerHTML = "ADD";
+        button.classList.add("add");
+    }
 
     button.addEventListener("click", function (e){
         if (button.classList.contains("add")){
