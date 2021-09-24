@@ -63,7 +63,7 @@ main{
     border-radius: 10px;
 }
 
-.onePainting > img{
+.onePainting img{
     width: 180px;
 }
 
@@ -76,13 +76,6 @@ main{
 button{
     position:relative;
     top:11px;
-}
-.add{
-
-}
-
-.remove{
-
 }
 
 .selected{

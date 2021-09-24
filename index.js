@@ -6,30 +6,19 @@ const mainUser = {
     favs: []
     };
 
+//kalla på mainUser direkt
 showMainFirst();
 async function showMainFirst(){
     let paintingArr = JSON.parse(localStorage.getItem("Paintings"));
     const data = await getSameTasteUsers();
     
     let main = data.message.filter(main => main.id == mainUser.id);
-    let mainFavs = data.message.find(user => user.id == mainUser.id).favs;
-    let mainFavsInt = mainFavs.map(function(item) {return parseInt(item, 10);});
-    
-    //kalla på mainUser direkt
-    let mainFavPaintings = paintingArr.filter((id) => mainFavsInt.includes(id.objectID));
-    console.log(mainFavPaintings)
 
-    //let restPaintings = paintingArr.filter((id) => !mainFavPaintings.objectID.includes(id.objectID));
-    let restPaintings = paintingArr.filter((id) => !mainFavsInt.includes(id.objectID));
+    document.querySelector("#listOfPaintings").append(loadingScreen("#listOfPaintings"));
 
-    mainFavPaintings.push(...restPaintings);
-    console.log(mainFavPaintings);
-    
-
-    return showPaintings(mainFavPaintings, main, paintingArr);
+    return showPaintings(paintingArr, main, paintingArr);
 }
 
-getSameTasteUsers();
 //få ut alla users från SameTaste DB
 async function getSameTasteUsers(){
     let paintingArr = JSON.parse(localStorage.getItem("Paintings"));
@@ -44,22 +33,9 @@ async function getSameTasteUsers(){
     data.message.unshift(...main);
     data.message.splice(16,1);
 
-
     let mainFavs = data.message.find(user => user.id == mainUser.id).favs;
     let mainFavsInt = mainFavs.map(function(item) {return parseInt(item, 10);});
-    
-    //kalla på mainUser direkt
-    //let mainFavPaintings = paintingArr.filter((id) => mainFavsInt.includes(id.objectID));
-    //console.log(mainFavPaintings)
-//
-    ////let restPaintings = paintingArr.filter((id) => !mainFavPaintings.objectID.includes(id.objectID));
-    //let restPaintings = paintingArr.filter((id) => !mainFavsInt.includes(id.objectID));
 
-    //mainFavPaintings.push(...restPaintings);
-    //console.log(mainFavPaintings);
-    
-
-    //showPaintings(mainFavPaintings, main, paintingArr);
 
     data.message.forEach(num => {
         let oneUser = document.createElement("div");
@@ -67,8 +43,12 @@ async function getSameTasteUsers(){
         document.querySelector("#listOfUsers").append(oneUser);
         document.querySelector("#listOfUsers").firstChild.classList.add("selected");
 
-        let commonFavs = num.favs.filter(fav => mainFavsInt.includes(fav));
-        oneUser.innerHTML = `<span>${num.alias}</span>, <span>[${num.favs.length}] (${commonFavs.length})</span>`;
+        //cmon varför lade du in dina favoriter som strängar. man.
+        let numFavInt = num.favs.map(function(item) {return parseInt(item, 10);});
+        let commonFavs = numFavInt.filter(fav => mainFavsInt.includes(fav));
+        let commonFavsInt = commonFavs.map(function(item) {return parseInt(item, 10);});
+
+        oneUser.innerHTML = `<span>${num.alias}</span>, <span>[${num.favs.length}] (${commonFavsInt.length})</span>`;
 
         oneUser.addEventListener("click", (e) => {
             document.querySelector("#listOfPaintings").innerHTML = "";
@@ -90,7 +70,7 @@ async function getSameTasteUsers(){
                 }
             })
             console.log(filteredUserFavs);
-            showPaintings(filteredUserFavs, specificUser, paintingArr);
+            showPaintings(filteredUserFavs, specificUser, paintingArr, commonFavsInt);
         });
     });
     return data;
@@ -181,8 +161,7 @@ async function showPaintings(arrayOfObjectPaintings, user, allPaintings){
         array = arrayOfObjectPaintings;
     }
 
-    console.log(array);
-    array.sort((a,b) => a.artistDisplayName < b.artistDisplayName);
+    array.sort((a,b) => a.artistDisplayName > b.artistDisplayName);
 
     array.forEach(element => {
         let paintingDiv = document.createElement("div");
@@ -190,7 +169,9 @@ async function showPaintings(arrayOfObjectPaintings, user, allPaintings){
         paintingDiv.classList.add("onePainting");
 
         paintingDiv.innerHTML = `
+        <div class="frame">
             <img src="${element.primaryImageSmall}">
+        </div>
             <div class="paintingText">
                 <p>${element.artistDisplayName}</p>
                 <p>${element.title}</p>
@@ -208,7 +189,7 @@ function addFavoriteWork(paintingID, user, favoritePaintings, users){
 
     let favoriteArray;
 
-    if (!user){
+    if (user){
         user = users.find(user => user.id === mainUser.id);
         favoriteArray = user.favs;
     } else {
@@ -227,7 +208,8 @@ function addFavoriteWork(paintingID, user, favoritePaintings, users){
         if (button.classList.contains("add")){
         console.log("add");
         
-        let click = e.target.nextElementSibling.currentSrc;
+        let click = e.target.nextElementSibling.firstElementChild.currentSrc;
+        console.log(click);
 
         let findObjectID = paintingArr.find(pain => click == pain.primaryImageSmall);
         console.log(findObjectID.objectID);
@@ -261,7 +243,7 @@ function addFavoriteWork(paintingID, user, favoritePaintings, users){
             }});
 
             } else if (button.classList.contains("remove")){
-                let click = e.target.nextElementSibling.currentSrc;
+                let click = e.target.nextElementSibling.firstElementChild.currentSrc;
 
                 let findObjectID = paintingArr.find(pain => click == pain.primaryImageSmall);
                 console.log(findObjectID.objectID);
@@ -294,6 +276,9 @@ function addFavoriteWork(paintingID, user, favoritePaintings, users){
             });
         }
     });
+    if(!user.id == 12){
+        button.remove();
+    }
     return button;
 };
 
