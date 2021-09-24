@@ -97,7 +97,6 @@ async function getSameTasteUsers(){
             //jämför målningar mellan localStorage och den specifika 
             //användarens favoriter. visar bara dennes.
             let specificUserFavs = paintingArr.filter((ID) => specificClickUser.favs.includes(ID.objectID));
-            console.log(specificUserFavs);
 
             loadingScreen("#listOfPaintings");
             showPaintings(specificUserFavs);
