@@ -19,7 +19,7 @@ async function showMainFirst(){
 
     document.querySelector("#listOfPaintings").append(loadingScreen("#listOfPaintings"));
 
-    return showPaintings(paintingArr, main, paintingArr, mainFavsInt);
+    return showPaintings(paintingArr, main, paintingArr, mainFavsInt, mainFavs);
 }
 
 //få ut alla users från SameTaste DB
@@ -52,7 +52,7 @@ async function getSameTasteUsers(){
         let commonFavsInt = commonFavs.map(function(item) {return parseInt(item, 10);});
 
         let common  = commonFavsInt.filter(fav => mainFavsInt.includes(fav))
-console.log(common)
+        console.log(common)
 
         oneUser.innerHTML = `<span>${num.alias}</span>, <span>[${num.favs.length}] (${commonFavsInt.length})</span>`;
 
@@ -63,8 +63,10 @@ console.log(common)
             active.classList.remove("selected");
             e.target.classList.add("selected");
 
-            let clickedUser = e.target.firstChild.innerHTML;
-            let specificUser = data.message.find(user => user.alias == `${clickedUser}`);
+            let clickedUser = num.id;
+            let specificUser = data.message.find(user => user.id == `${clickedUser}`);
+
+            let mainFavPaintings = mainFavs.map(function(item) {return parseInt(item, 10);});
 
             let filteredUserFavs = paintingArr.filter((id) => {
                 let specificClickUser = specificUser.favs.map(fave => parseInt(fave, 10));
@@ -74,13 +76,12 @@ console.log(common)
                 } else {
                     return specificClickUser.includes((id.objectID));
                 }
-            })
-            console.log(common)
-            showPaintings(filteredUserFavs, specificUser, paintingArr, common);
+            });
+            showPaintings(filteredUserFavs, specificUser, paintingArr, common, mainFavs);
         });
     });
     return data;
-}
+};
 
 //var trettionde sekund hämtas alla users.
 setInterval(getSameTasteUsers, 30000);
@@ -152,8 +153,8 @@ async function getPaintingInfo(arrayOfIDs){
     return paintingArr;
 };
 
-async function showPaintings(arrayOfObjectPaintings, user, allPaintings, commonFavs){
-    console.log(commonFavs);
+async function showPaintings(arrayOfObjectPaintings, user, allPaintings, commonFavs, mainFavs){
+    console.log(user);
     const response = await fetch("http://mpp.erikpineiro.se/dbp/sameTaste/users.php");
     const data = await response.json();
 
@@ -172,6 +173,7 @@ async function showPaintings(arrayOfObjectPaintings, user, allPaintings, commonF
     array.forEach(element => {
         let paintingDiv = document.createElement("div");
         let listOfPaintings = document.getElementById("listOfPaintings");
+        listOfPaintings.append(paintingDiv);
         paintingDiv.classList.add("onePainting");
 
         paintingDiv.innerHTML = `
@@ -184,13 +186,19 @@ async function showPaintings(arrayOfObjectPaintings, user, allPaintings, commonF
             </div>
         `;
 
-        //console.log(commonFavs);
-        //if (commonFavs.includes(element.objectID)){
-        //    document.querySelector(".frame").classList.add("sameFavorite");
-        //}
+        if(!mainFavs.includes(element.objectID)){
+            paintingDiv.querySelector(".frame").classList.add("favorited");
+        }
 
-        paintingDiv.prepend(addFavoriteWork(element.objectID, user, arrayOfObjectPaintings, users))
-        listOfPaintings.append(paintingDiv);
+        if (commonFavs.includes(element.objectID)){
+            paintingDiv.querySelector(".frame").classList.add("sameFavorite");
+        }
+        console.log(user[0].id);
+        console.log(mainUser.id);
+
+        if(user[0].id == mainUser.id){
+            paintingDiv.prepend(addFavoriteWork(element.objectID, user, arrayOfObjectPaintings, users))
+        }
     });
 }
 
@@ -287,9 +295,6 @@ function addFavoriteWork(paintingID, user, favoritePaintings, users){
             });
         }
     });
-    if(!user.id == 12){
-        button.remove();
-    }
     return button;
 };
 

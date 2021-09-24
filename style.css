@@ -2,13 +2,20 @@ body{
     height:100vh;
     background-color: rgb(140, 140, 228);
     overflow-y: hidden;
+    width: 100vw;
+    display:flex;
+    flex-direction: row;
+
+    justify-content: center;
+    align-items: center;
 }
 
 main{
     display:flex;
     flex-direction: row;
     margin: 10px;
-    height: 100vh;
+    height: 100%;
+    width: 100%;
 }
 
 /* användarna */
@@ -18,7 +25,6 @@ main{
     overflow-y:scroll;
     width: 250px;
     height: 100vh;
-
 }
 
 .oneUser{
@@ -49,28 +55,32 @@ main{
     display:flex;
     flex-direction: row;
     flex-wrap:wrap;
-    width: 70vw;
+    width: 100%;
 }
 
 .onePainting{
-    display:flex;
+    display: flex;
     flex-direction: column;
+    justify-content: center;
     align-items: center;
-    width: 180px;
-    margin: 15px;
-    background-color: rgb(159, 212, 233);
+
     padding: 10px;
-    border-radius: 10px;
+
+    background-color: rgba(0, 0, 0, 0.219);
+    margin: 10px; 
+    border-radius: 8px;
 }
 
 .onePainting img{
-    width: 180px;
+    height: 200px;
+    width: 200px;
 }
 
 .paintingText{
     display: flex;
     align-items: center;
     flex-direction: column;
+    margin: 0px;
 }
 
 button{
@@ -84,11 +94,11 @@ button{
 }
 
 .favorited{
-    border: 10px cornflowerblue;
+    border: 10px solid rgb(67, 192, 56);
 }
 
 .sameFavorite{
-    border: 10px solid rgb(86, 209, 86);
+    border: 10px solid rgb(209, 121, 86);
 }
 
 .showUpDiv{
