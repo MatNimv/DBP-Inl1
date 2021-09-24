@@ -6,7 +6,13 @@ const mainUser = {
     favs: []
     };
 
-showPaintings(JSON.parse(localStorage.getItem("Paintings")));
+    //lägger till klass till mainUser, inte direkt för då har elementet inte skapats.
+setTimeout(
+function() {
+    document.querySelector("#listOfUsers").firstChild.classList.add("selected")
+}, 3000);
+
+//showPaintings(JSON.parse(localStorage.getItem("Paintings")));
 
 getSameTasteUsers();
 //få ut alla users från SameTaste DB
@@ -40,31 +46,35 @@ async function getSameTasteUsers(){
         let nameDiv = document.createElement("div");
         let listan = document.getElementById("listOfUsers");
 
-        if(element.id == mainUser.id){nameDiv.classList.add("selected")};
+        //if(element.id == mainUser.id){nameDiv.classList.add("selected")};
 
         nameDiv.innerHTML = `<span>${element.alias}</span>, <span>[${element.favs.length}] (${commonFavsArr.length})</span>`;
         nameDiv.classList.add("oneUser");
         listan.append(nameDiv);
     });
 
-        //när jag klickar på en specifik användare hämtar jag dens
-        //information och jämför med mainUser.
         document.querySelector("#listOfUsers").append(loadingScreen("#listOfUsers"));
+
+        
+    return data;
+}
+getSameTasteUsers()
+    .then(data => {
+
+        let paintingArr = JSON.parse(localStorage.getItem("Paintings"));
 
         document.querySelector("#listOfUsers").addEventListener("click", function(e){
             document.querySelector("#listOfPaintings").innerHTML = "";
-            let clickedUser = e.target.firstChild.innerHTML;
+            let selectedUser = document.querySelector(".selected").firstChild.innerHTML;
 
             var active = document.querySelector(".selected");
             active.classList.remove("selected");
-
-            //userName.innerHTML = `${clickedUser}s`;
 
             e.target.classList.add("selected");
 
             //jag måste koppla mina favoriter med deras.
             //samtidigt få fram alla deras favvosar. 
-            let specificClickUser = data.message.find(user => user.alias == `${clickedUser}`);
+            let specificClickUser = data.message.find(user => user.alias == `${selectedUser}`);
 
             //skapar om eventuella strings i favs till int
             let specificClickUserFAVS = specificClickUser.favs.map(function(item) {return parseInt(item, 10);});
@@ -85,6 +95,7 @@ async function getSameTasteUsers(){
                 showPaintings(otherPaintings);
             } else {
 
+            
             //jämför mainUsers favoriter med den specifika användarens favoriter
             //om de som är samma, läggs till i arrayen.
             let comparableFavIDs = myFavIDs.filter((ID) => specificClickUser.favs.includes(ID));
@@ -103,8 +114,7 @@ async function getSameTasteUsers(){
             showPaintings(specificUserFavs);
         }
     });
-    return data;
-}
+})
 
 //var trettionde sekund hämtas alla users.
 setInterval(getSameTasteUsers, 30000);
@@ -176,8 +186,17 @@ async function getPaintingInfo(arrayOfIDs){
     return paintingArr;
 };
 
-function showPaintings(arrayOfObjectPaintings, klass){
+async function showPaintings(arrayOfObjectPaintings, klass){
 
+    const data = await getSameTasteUsers();
+    //const JSONData = data.map(response => response.json());
+    //const promisedData = await Promise.all(data);
+
+    console.log(data);
+    
+
+
+    console.log(arrayOfObjectPaintings)
     arrayOfObjectPaintings.sort((a,b) => a.artistDisplayName > b.artistDisplayName);
 
     arrayOfObjectPaintings.forEach(element => {
@@ -200,20 +219,7 @@ function showPaintings(arrayOfObjectPaintings, klass){
 
 function yourHandler(klass){
 
-    //här behövs en jämförelse göras då jag 
-    //kallar på datan från getUserSameTaste
     let button = document.createElement("button");
-//
-    //document.querySelector("#listOfUsers").innerHTML = "";
-    //const response = await fetch("http://mpp.erikpineiro.se/dbp/sameTaste/users.php");
-    //const data = await response.json();
-
-    //om objectID är inom mainUser favorit - ge knappen denna innerHMTL. REMOVE
-    
-
-    //om objectID är gemensam med mainUser och specifikUser favorit - ge knappen denna innerHMTL. REMOVE
-
-    //om objectID är ingetdera - ge knappen denna innerHMTL. ADD
 
     let paintingArr = JSON.parse(localStorage.getItem("Paintings"));
 
