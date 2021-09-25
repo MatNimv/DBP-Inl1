@@ -15,12 +15,14 @@ async function showMainFirst(){
     let main = data.message.filter(main => main.id == mainUser.id);
 
     let mainFavs = data.message.find(user => user.id == mainUser.id).favs;
-    console.log(mainFavs);
+
     let mainFavsInt = mainFavs.map(function(item) {return parseInt(item, 10);});
 
     document.querySelector("#listOfPaintings").append(loadingScreen("#listOfPaintings"));
 
-    return showPaintings(paintingArr, main, paintingArr, mainFavsInt, mainFavs);
+
+
+    return showPaintings(paintingArr, main, paintingArr, mainFavsInt, mainFavsInt);
 }
 
 //få ut alla users från SameTaste DB
@@ -31,6 +33,8 @@ async function getSameTasteUsers(){
     const response = await fetch("http://mpp.erikpineiro.se/dbp/sameTaste/users.php");
     const data = await response.json();
     data.message.sort((a,b) => a.alias > b.alias);
+
+    console.log(data);
 
     //flyttar mainUser längst upp
     let main = data.message.filter(main => main.id == mainUser.id);
@@ -54,7 +58,7 @@ async function getSameTasteUsers(){
 
         let common  = commonFavsInt.filter(fav => mainFavsInt.includes(fav))
 
-        oneUser.innerHTML = `<span>${num.alias}</span>, <span>[${num.favs.length}] (${commonFavsInt.length})</span>`;
+        oneUser.innerHTML = `<span>${num.alias}</span>, <span>[${num.favs.length}]</span> <span class="commonFav">(${commonFavsInt.length})</span>`;
 
         oneUser.addEventListener("click", (e) => {
             document.querySelector("#listOfPaintings").innerHTML = "";
@@ -71,17 +75,24 @@ async function getSameTasteUsers(){
             let filteredUserFavs = paintingArr.filter((id) => {
                 let specificClickUser = specificUser.favs.map(fave => parseInt(fave, 10));
 
+                //om mainUser är klickad så skicka  
                 if (specificUser.id == mainUser.id){
                     return mainFavPaintings;
                 } else {
                     return specificClickUser.includes((id.objectID));
                 }
             });
-            showPaintings(filteredUserFavs, specificUser, paintingArr, common, mainFavs);
+            showPaintings(filteredUserFavs, specificUser, paintingArr, common, mainFavsInt);
         });
     });
+
+    //tar bort mainUsers common favorit <span>.
+    let allUsers = document.querySelectorAll(".oneUser");
+    allUsers[0].lastElementChild.remove();
     return data;
 };
+
+
 
 //var trettionde sekund hämtas alla users.
 setInterval(getSameTasteUsers, 30000);
@@ -115,7 +126,7 @@ async function getPaintingsIDs(){
 }
 //tar datan (IDs) från getPaintingIDs - och sätter in det i getPaintingInfo
 getPaintingsIDs()
-    .then(data => getPaintingInfo(data))
+    .then(data => getPaintingInfo(data));
 
 
 async function getPaintingInfo(arrayOfIDs){
@@ -153,7 +164,8 @@ async function getPaintingInfo(arrayOfIDs){
     return paintingArr;
 };
 
-async function showPaintings(arrayOfObjectPaintings, user, allPaintings, commonFavs, mainFavs){
+async function showPaintings(arrayOfObjectPaintings, user, allPaintings, commonFavs, mainFavsInt){
+    console.log(commonFavs);
     const response = await fetch("http://mpp.erikpineiro.se/dbp/sameTaste/users.php");
     const data = await response.json();
 
@@ -176,25 +188,41 @@ async function showPaintings(arrayOfObjectPaintings, user, allPaintings, commonF
         paintingDiv.classList.add("onePainting");
 
         paintingDiv.innerHTML = `
-        <div class="frame">
             <img src="${element.primaryImageSmall}">
-        </div>
+
             <div class="paintingText">
                 <p>${element.artistDisplayName}</p>
                 <p>${element.title}</p>
             </div>
         `;
 
-        if(!mainFavs.includes(element.objectID)){
-            paintingDiv.querySelector(".frame").classList.add("favorited");
-        }
-
         if (commonFavs.includes(element.objectID)){
-            paintingDiv.querySelector(".frame").classList.add("sameFavorite");
+            paintingDiv.classList.add("sameFavorite");
         }
 
-        if(user[0].id == mainUser.id){
+
+console.log(mainFavsInt);
+console.log(commonFavs);
+        //if(mainFavsInt.includes(element.objectID)){
+        //    paintingDiv.classList.add("favorited");
+        //}
+
+
+
+        //main skickar in som objekt i array.
+        //resterande users skickar in endast som objekt.
+        if(user.length == 1){
+            if(user[0].id == mainUser.id){
+                paintingDiv.prepend(addFavoriteWork(element.objectID, user, arrayOfObjectPaintings, users))
+                if(mainFavsInt.includes(element.objectID)){
+                    paintingDiv.classList.add("favorited");
+                }
+            }
+        } else if (user.id == mainUser.id){
             paintingDiv.prepend(addFavoriteWork(element.objectID, user, arrayOfObjectPaintings, users))
+            if(mainFavsInt.includes(element.objectID)){
+                paintingDiv.classList.add("favorited");
+            }
         }
     });
 }
@@ -223,7 +251,8 @@ function addFavoriteWork(paintingID, user, favoritePaintings, users){
     button.addEventListener("click", function (e){
         if (button.classList.contains("add")){
         
-        let click = e.target.nextElementSibling.firstElementChild.currentSrc;
+        let click = e.target.nextElementSibling.currentSrc;
+        let loadingClick = e.target.nextElementSibling;
 
         let findObjectID = paintingArr.find(pain => click == pain.primaryImageSmall);
 
@@ -231,7 +260,12 @@ function addFavoriteWork(paintingID, user, favoritePaintings, users){
         button.classList.add("remove");
         button.classList.remove("add");
 
-        document.querySelector("#listOfPaintings").append(loadingScreen("#listOfPaintings"));
+        console.log(loadingClick);
+
+        document.querySelector("#listOfPaintings").append(loadingScreen(`#listOfPaintings`));
+        loadingClick.classList.add("pending")
+
+        loadingClick.append(loadingScreen(".pending"))
 
         fetch(new Request("http://mpp.erikpineiro.se/dbp/sameTaste/users.php",
         {
@@ -245,18 +279,23 @@ function addFavoriteWork(paintingID, user, favoritePaintings, users){
                 console.log("maxinum favs uppnådd");
             }else if (response.status == 404){
                 console.log("user_ID finns inte i DB");
+                window.alert("Max antal favoriter uppnådd!");
             }else if (response.status == 400){
                 console.log("bad request: various");
             }else if (response.status == 415){
                 console.log("skicka en JSON TACK.");
             }else if (response.status == 200){
                 console.log("tillagning gick bra");
+                window.alert("Gick bra att lägga till.")
             }else {
                 return response.json();
             }});
 
+            loadingClick.classList.remove("pending");
+
             } else if (button.classList.contains("remove")){
-                let click = e.target.nextElementSibling.firstElementChild.currentSrc;
+                let click = e.target.nextElementSibling.currentSrc;
+                let loadingClick = e.target.nextElementSibling;
 
                 let findObjectID = paintingArr.find(pain => click == pain.primaryImageSmall);
                 console.log(findObjectID.objectID);
@@ -266,6 +305,9 @@ function addFavoriteWork(paintingID, user, favoritePaintings, users){
                 button.classList.remove("remove");
 
                 document.querySelector("#listOfPaintings").append(loadingScreen("#listOfPaintings"));
+                loadingClick.classList.add("pending");
+
+                loadingClick.append(loadingScreen(".pending"));
 
             fetch(new Request("http://mpp.erikpineiro.se/dbp/sameTaste/users.php",
             {
@@ -282,11 +324,13 @@ function addFavoriteWork(paintingID, user, favoritePaintings, users){
                     console.log("skicka en JSON TACK.");
                 }else if (response.status == 200){
                     console.log("borttagning gick bra.");
+                    window.alert("Gick bra att ta bort.")
                 }
                 else {
                     return response.json();
                 }
             });
+            //loadingClick.classList.remove("pending");
         }
     });
     return button;
