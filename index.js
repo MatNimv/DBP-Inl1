@@ -21,6 +21,9 @@ async function showMainFirst(){
     document.querySelector("#listOfPaintings").append(loadingScreen("#listOfPaintings"));
     document.querySelector("#listOfUsers").append(loadingScreen("#listOfUsers"));
 
+    let allUsers = document.querySelectorAll(".oneUser");
+    allUsers[0].classList.add("userSelected");
+
     return showPaintings(paintingArr, main, paintingArr, mainFavsInt, mainFavsInt);
 }
 
@@ -49,7 +52,6 @@ async function getSameTasteUsers(){
         let oneUser = document.createElement("div");
         oneUser.classList.add("oneUser");
         document.querySelector("#listOfUsers").append(oneUser);
-        document.querySelector("#listOfUsers").firstChild.classList.add("selected");
 
         //cmon varför lade du in dina favoriter som strängar. man.
         let numFavInt = num.favs.map(function(item) {return parseInt(item, 10);});
@@ -63,9 +65,9 @@ async function getSameTasteUsers(){
         oneUser.addEventListener("click", (e) => {
             document.querySelector("#listOfPaintings").innerHTML = "";
 
-            var active = document.querySelector(".selected");
-            active.classList.remove("selected");
-            e.target.classList.add("selected");
+            var active = document.querySelector(".userSelected");
+            active.classList.remove("userSelected");
+            e.target.classList.add("userSelected");
 
             let clickedUser = num.id;
             let specificUser = data.message.find(user => user.id == `${clickedUser}`);
