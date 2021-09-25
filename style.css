@@ -1,6 +1,6 @@
 body{
     height:100vh;
-    background-color: rgb(140, 140, 228);
+    background-color: rgb(26, 6, 29);
     overflow-y: hidden;
     width: 100vw;
     display:flex;
@@ -17,6 +17,11 @@ main{
     margin: 10px;
     height: 100%;
     width: 100%;
+}
+
+#wrapper{
+    height: 100vh;
+    width: 100vw;
 }
 
 /* användarna */
@@ -54,14 +59,6 @@ main{
     flex-wrap:wrap;
     width: 100%;
     justify-content: center;
-    /*position: relative;
-    flex-grow: 1;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, 215px);
-    grid-auto-rows: 215px;
-    gap: 25px;
-    padding: 20px;
-    overflow-y: scroll;*/
 }
 
 .onePainting{
@@ -69,6 +66,7 @@ main{
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    position: relative;
 
     padding: 30px;
     overflow: hidden;
@@ -78,22 +76,10 @@ main{
     width: 180px;
     height: 180px;
     transition: opacity 1s;
-    /*position: relative;
-    background-color: white;
-    display: flex;
-    flex-direction: column;
-    */
     box-shadow: 1px 1px 10px black;
-    
-    
 }
 
 .onePainting img{
-    /*height: 200px;
-    width: 200px;
-    max-height: 100%;
-    max-width: 80%;*/
-
     max-width: 100%;
     max-height: 60%;
     margin: auto;
@@ -110,6 +96,7 @@ main{
     align-items: center;
     flex-direction: column;
     margin: 0px;
+    text-align: center;
 }
 
 button{
@@ -123,12 +110,13 @@ button{
     color:white;
 }
 
-div .favorited{
+.favorited{
     border: 10px solid rgb(141, 174, 235);
 }
 
 .sameFavorite{
     border: 10px solid rgb(228, 156, 186);
+    z-index: 10;
 }
 
 .showUpDiv{
@@ -138,15 +126,32 @@ div .favorited{
     color: white;
 }
 
+#userName{
+    height: 50px;
+    position: relative;
+    top: 0px;
+    left: 0px;
+    display:flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 50px;
+}
+
+#ultraMegaFav{background-color:  rgb(141, 174, 235);}
+#gemensamFav{background-color: rgb(228, 156, 186);}
+.cirkel{width: 30px; height: 30px; border-radius: 100%; margin: 10px 0px 10px 0px;}
+
+#userName p{
+    color: white;
+    margin: 15px 0px 10px 0px;
+}
+
 /* LADDDNINNNGGGG */
 
 .lds-dual-ring {
     display: inline-block;
     width: 80px;
     height: 80px;
-    position: absolute;
-    top: 50%;
-    left: 10vw;
 }
 .lds-dual-ring:after {
     content: " ";
@@ -168,7 +173,7 @@ div .favorited{
     }
 }
 
-#listOfUsers .darkDiv{
+.darkDiv{
     position: absolute;
     top: 0px;
     left:0px;
@@ -185,7 +190,13 @@ div .favorited{
     left: 50%;
 }
 
+#listOfUsers .lds-dual-ring{
+    width: 80px;
+    height: 80px;
+    position: absolute;
+    top: 50%;
+    left: 50px;
+}
+
 .pending{
-    width: 100%;
-    height:100%;
 }

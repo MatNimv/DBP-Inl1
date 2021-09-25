@@ -19,8 +19,7 @@ async function showMainFirst(){
     let mainFavsInt = mainFavs.map(function(item) {return parseInt(item, 10);});
 
     document.querySelector("#listOfPaintings").append(loadingScreen("#listOfPaintings"));
-
-
+    document.querySelector("#listOfUsers").append(loadingScreen("#listOfUsers"));
 
     return showPaintings(paintingArr, main, paintingArr, mainFavsInt, mainFavsInt);
 }
@@ -44,6 +43,7 @@ async function getSameTasteUsers(){
     let mainFavs = data.message.find(user => user.id == mainUser.id).favs;
     let mainFavsInt = mainFavs.map(function(item) {return parseInt(item, 10);});
 
+    document.querySelector("#listOfUsers").append(loadingScreen("#listOfUsers"));
 
     data.message.forEach(num => {
         let oneUser = document.createElement("div");
@@ -71,18 +71,20 @@ async function getSameTasteUsers(){
             let specificUser = data.message.find(user => user.id == `${clickedUser}`);
 
             let mainFavPaintings = mainFavs.map(function(item) {return parseInt(item, 10);});
+            let specificUserFavs = specificUser.favs.map(fave => parseInt(fave, 10));
 
             let filteredUserFavs = paintingArr.filter((id) => {
                 let specificClickUser = specificUser.favs.map(fave => parseInt(fave, 10));
+                console.log(specificClickUser);
 
-                //om mainUser är klickad så skicka  
+                //om mainUser är klickad så skicka dens favoriter
                 if (specificUser.id == mainUser.id){
                     return mainFavPaintings;
                 } else {
                     return specificClickUser.includes((id.objectID));
                 }
             });
-            showPaintings(filteredUserFavs, specificUser, paintingArr, common, mainFavsInt);
+            showPaintings(filteredUserFavs, specificUser, paintingArr, common, specificUserFavs);
         });
     });
 
@@ -164,8 +166,8 @@ async function getPaintingInfo(arrayOfIDs){
     return paintingArr;
 };
 
-async function showPaintings(arrayOfObjectPaintings, user, allPaintings, commonFavs, mainFavsInt){
-    console.log(commonFavs);
+async function showPaintings(arrayOfObjectPaintings, user, allPaintings, commonFavs, userFavs){
+
     const response = await fetch("http://mpp.erikpineiro.se/dbp/sameTaste/users.php");
     const data = await response.json();
 
@@ -196,32 +198,34 @@ async function showPaintings(arrayOfObjectPaintings, user, allPaintings, commonF
             </div>
         `;
 
+        if(userFavs.includes(element.objectID)){
+            paintingDiv.classList.add("favorited");
+        }
         if (commonFavs.includes(element.objectID)){
             paintingDiv.classList.add("sameFavorite");
         }
-
-
-console.log(mainFavsInt);
-console.log(commonFavs);
-        //if(mainFavsInt.includes(element.objectID)){
-        //    paintingDiv.classList.add("favorited");
-        //}
-
-
 
         //main skickar in som objekt i array.
         //resterande users skickar in endast som objekt.
         if(user.length == 1){
             if(user[0].id == mainUser.id){
                 paintingDiv.prepend(addFavoriteWork(element.objectID, user, arrayOfObjectPaintings, users))
-                if(mainFavsInt.includes(element.objectID)){
-                    paintingDiv.classList.add("favorited");
+                if(userFavs.includes(element.objectID)){
+                    //krånglig lösning. but. innan hamnade .favorited under .sameFavorite
+                    //krångliga problem kräver krångliga lösningar
+                    let allFavorites = document.querySelectorAll(".favorited");
+                    for (let i = 0; i < allFavorites.length; i++) {
+                        allFavorites[i].style.border = "10px solid rgb(141, 174, 235)";
+                    }
                 }
             }
         } else if (user.id == mainUser.id){
             paintingDiv.prepend(addFavoriteWork(element.objectID, user, arrayOfObjectPaintings, users))
-            if(mainFavsInt.includes(element.objectID)){
-                paintingDiv.classList.add("favorited");
+            if(userFavs.includes(element.objectID)){
+                    let allFavorites = document.querySelectorAll(".favorited");
+                    for (let i = 0; i < allFavorites.length; i++) {
+                        allFavorites[i].style.border = "10px solid rgb(141, 174, 235)";
+                }
             }
         }
     });
@@ -239,8 +243,11 @@ function addFavoriteWork(paintingID, user, favoritePaintings, users){
     } else {
         favoriteArray = favoritePaintings.map(obj => obj.objectID);
     }
+    //himla strängar och ints. bleh, problemlösning at its finest
+    let favoriteArrayint = favoriteArray.map(function(item) {return parseInt(item, 10);});
 
-    if (favoriteArray.includes(paintingID)){
+
+    if (favoriteArrayint.includes(paintingID)){
         button.innerHTML = "REMOVE";
         button.classList.add("remove");
     } else {
@@ -254,13 +261,17 @@ function addFavoriteWork(paintingID, user, favoritePaintings, users){
         let click = e.target.nextElementSibling.currentSrc;
         let loadingClick = e.target.nextElementSibling;
 
+        //märker divven som favorit
+        let buttonParent = e.target.parentElement;
+
+        buttonParent.style.border = "10px solid rgb(141, 174, 235)";
+
+
         let findObjectID = paintingArr.find(pain => click == pain.primaryImageSmall);
 
         button.innerHTML = "REMOVE";
         button.classList.add("remove");
         button.classList.remove("add");
-
-        console.log(loadingClick);
 
         document.querySelector("#listOfPaintings").append(loadingScreen(`#listOfPaintings`));
         loadingClick.classList.add("pending")
@@ -295,19 +306,20 @@ function addFavoriteWork(paintingID, user, favoritePaintings, users){
 
             } else if (button.classList.contains("remove")){
                 let click = e.target.nextElementSibling.currentSrc;
-                let loadingClick = e.target.nextElementSibling;
 
                 let findObjectID = paintingArr.find(pain => click == pain.primaryImageSmall);
-                console.log(findObjectID.objectID);
 
                 button.innerHTML = "ADD";
                 button.classList.add("add");
                 button.classList.remove("remove");
+                let buttonParent = e.target.parentElement;
+
+                buttonParent.style.border ="none";
 
                 document.querySelector("#listOfPaintings").append(loadingScreen("#listOfPaintings"));
-                loadingClick.classList.add("pending");
+                buttonParent.classList.add("pending");
 
-                loadingClick.append(loadingScreen(".pending"));
+                buttonParent.append(loadingScreen(".pending"));
 
             fetch(new Request("http://mpp.erikpineiro.se/dbp/sameTaste/users.php",
             {
@@ -330,7 +342,6 @@ function addFavoriteWork(paintingID, user, favoritePaintings, users){
                     return response.json();
                 }
             });
-            //loadingClick.classList.remove("pending");
         }
     });
     return button;
