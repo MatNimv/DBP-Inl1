@@ -29,22 +29,26 @@ main{
 
 /* användarna */
 #listOfUsers{
-    background-color:rgb(216, 173, 240);
-    margin-left: 5%;
+    /*background-color:rgb(216, 173, 240);*/
+    margin-left: 4%;
     overflow-y:auto;
     width: 350px;
     height: 750px;
+    border-radius: 5px;
 }
 
 .oneUser{
     margin: 5px;
     padding: 15px;
     border: 1px solid rgba(109, 70, 114, 0.233);
+    background-color: rgb(63, 40, 66);;
     border-radius: 5px;
+    color:rgb(189, 189, 189);
 }
 
 .oneUser:hover{
     background-color:rgba(179, 117, 190, 0.753);
+    color:white;
 }
 
 .userSelected{
@@ -85,7 +89,6 @@ main{
 .onePainting img{
     max-width: 100%;
     max-height: 60%;
-    margin: auto;
 }
 
 .onePainting p{
@@ -142,11 +145,11 @@ button{
 
 #ultraMegaFav{background-color:  rgb(141, 174, 235);}
 #gemensamFav{background-color: rgb(228, 156, 186);}
-.cirkel{width: 30px; height: 30px; border-radius: 100%; margin: 10px 0px 10px 0px;}
+.cirkel{width: 30px; height: 30px; border-radius: 100%; position:relative; top: 5px;}
 
 #userName p{
     color: white;
-    margin: 15px 0px 10px 0px;
+    margin: 10px 0px 15px 0px;
 }
 
 /* LADDDNINNNGGGG */
@@ -155,6 +158,11 @@ button{
     display: inline-block;
     width: 80px;
     height: 80px;
+    z-index: 100;
+
+    display:flex;
+    justify-content: center;
+    align-items: center;
 }
 .lds-dual-ring:after {
     content: " ";
@@ -166,6 +174,10 @@ button{
     border: 6px solid #fff;
     border-color: #fff transparent #fff transparent;
     animation: lds-dual-ring 1.2s linear infinite;
+
+    display:flex;
+    justify-content: center;
+    align-items: center;
 }
 @keyframes lds-dual-ring {
     0% {
@@ -190,7 +202,7 @@ button{
     height: 80px;
     position: absolute;
     top: 50%;
-    left: 50%;
+    left: 55%;
 }
 
 #listOfUsers .lds-dual-ring{
@@ -198,6 +210,12 @@ button{
     height: 80px;
     position: absolute;
     top: 50%;
-    left: 50px;
+    left: 10%;
+}
+
+#listOfPaintings .onePainting .lds-dual-ring{
+    position: absolute;
+    top: 30%;
+    left: 30%;
 }
 
