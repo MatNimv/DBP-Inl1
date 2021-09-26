@@ -305,13 +305,18 @@ function addFavoriteWork(paintingID, user, favoritePaintings, users){
         .then( response =>{
             if (response.status == 409){
                 window.alert("Max antal favoriter uppnådd!");
+                buttonParent.style.border = "none";
+                button.innerHTML = "ADD";
             }else if (response.status == 404){
                 console.log("user_ID finns inte i DB");
                 window.alert("Användaren finns inte i databasen.");
+                buttonParent.style.border = "10px solid rgb(141, 174, 235)";
             }else if (response.status == 400){
                 window.alert("Bad request.");
+                buttonParent.style.border = "10px solid rgb(141, 174, 235)";
             }else if (response.status == 415){
                 window.alert("Databasen kräver en JSON.");
+                buttonParent.style.border = "10px solid rgb(141, 174, 235)";
             }else if (response.status == 200){
                 window.alert("Favorit tillagd.")
             }else {
