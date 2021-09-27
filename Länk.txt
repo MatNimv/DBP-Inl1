@@ -2,3 +2,6 @@ Länk till Inlämning1:
 http://inl1dbp.matildanimvik.se/
 
 :)))
+
+APIn för målningarna hämtas ibland långsammare än vad koden körs.
+Pls ladda om sidan, så den hinner hämtas.

@@ -9,6 +9,7 @@ const mainUser = {
 //mainUser är annorlunda från de andra users. kräver annorlunda parametrar till showPaintings
 async function showMainFirst(dataInfo){
     let paintingArr = JSON.parse(localStorage.getItem("Paintings"));
+    console.log(paintingArr);
     
     let main = dataInfo.message.filter(main => main.id == mainUser.id);
 
@@ -32,23 +33,20 @@ async function getSameTasteUsers(){
     return data;
 };
 
-//kör showMainFirst direkt efter datan har hämtats från getSameTasteUsers
-//när man laddar om sidan
-getSameTasteUsers()
-    .then(data => showMainFirst(data));
-
 showUsers();
 async function showUsers(){
     document.querySelector("#listOfUsers").innerHTML = "";
     let paintingArr = JSON.parse(localStorage.getItem("Paintings"));
     const data = await getSameTasteUsers();
+    console.log(data);
 
     data.message.sort((a,b) => a.alias > b.alias);
 
     //flyttar mainUser längst upp
     let main = data.message.filter(main => main.id == mainUser.id);
+    let deleteMainUser = data.message.findIndex(main => main.id == mainUser.id);
+    data.message.splice(deleteMainUser,1);
     data.message.unshift(...main);
-    data.message.splice(16,1);
 
     let mainFavs = data.message.find(user => user.id == mainUser.id).favs;
     let mainFavsInt = mainFavs.map(function(item) {return parseInt(item, 10);});
@@ -63,17 +61,17 @@ async function showUsers(){
         let commonFavs = numFavInt.filter(fav => mainFavsInt.includes(fav));
         let commonFavsInt = commonFavs.map(function(item) {return parseInt(item, 10);});
 
-        let common  = commonFavsInt.filter(fav => mainFavsInt.includes(fav))
+        let common  = commonFavsInt.filter(fav => mainFavsInt.includes(fav));
 
         oneUser.innerHTML = `<span>${num.alias}</span>, <span>[${num.favs.length}]</span> <span class="commonFav">(${commonFavsInt.length})</span>`;
 
-        oneUser.addEventListener("click", (e) => {
+        oneUser.addEventListener("click", () => {
             document.querySelector("#listOfPaintings").innerHTML = "";
             document.querySelector("#listOfPaintings").append(loadingScreen("#listOfPaintings"));
 
             var active = document.querySelector(".userSelected");
             active.classList.remove("userSelected");
-            e.target.classList.add("userSelected");
+            oneUser.classList.add("userSelected");
 
             let clickedUser = num.id;
             let specificUser = data.message.find(user => user.id == `${clickedUser}`);
@@ -101,6 +99,11 @@ async function showUsers(){
     //tar bort mainUsers common favorit <span>.
     allUsers[0].lastElementChild.remove();
 }
+
+//kör showMainFirst direkt efter datan har hämtats från getSameTasteUsers
+//när man laddar om sidan
+getSameTasteUsers()
+    .then(data => showMainFirst(data));
 
 
 //var trettionde sekund hämtas alla users.
@@ -192,6 +195,7 @@ async function showPaintings(arrayOfObjectPaintings, user, allPaintings, commonF
     let users = await data.message;
 
     let array;
+    console.log(array);
 
     if(user.id == mainUser.id){
         array = allPaintings;
@@ -247,7 +251,7 @@ async function showPaintings(arrayOfObjectPaintings, user, allPaintings, commonF
             }
         }
     });
-
+}
 
 function addFavoriteWork(paintingID, user, favoritePaintings, users){
     let button = document.createElement("button");
@@ -308,7 +312,6 @@ function addFavoriteWork(paintingID, user, favoritePaintings, users){
                 buttonParent.style.border = "none";
                 button.innerHTML = "ADD";
             }else if (response.status == 404){
-                console.log("user_ID finns inte i DB");
                 window.alert("Användaren finns inte i databasen.");
                 buttonParent.style.border = "10px solid rgb(141, 174, 235)";
             }else if (response.status == 400){
@@ -364,4 +367,3 @@ function addFavoriteWork(paintingID, user, favoritePaintings, users){
     });
     return button;
 };
-}
